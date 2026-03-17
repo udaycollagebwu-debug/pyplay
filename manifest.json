@@ -1,0 +1,15 @@
+{
+  "name": "PyPlan — Python in 4 Weeks",
+  "short_name": "PyPlan",
+  "description": "A gamified Python study plan with hints, unlocks and a secret project.",
+  "start_url": "./python_study_plan.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050510",
+  "theme_color": "#050510",
+  "icons": [
+    { "src": "icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["education", "productivity"]
+}

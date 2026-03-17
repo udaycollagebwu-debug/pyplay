@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Python Study Plan</title>
+<meta name="theme-color" content="#050510"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="PyPlan"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #050510; --surface: rgba(255,255,255,0.04); --border: rgba(255,255,255,0.1);
+    --w1: #00e5ff; --w2: #bf5fff; --w3: #ff6ec7; --w4: #ff9d3d;
+    --neon-blue: #00e5ff; --neon-pink: #ff3cac; --neon-purple: #bf5fff;
+    --text: #e8eeff; --muted: #7a85a8;
+    --font-head: 'Orbitron', sans-serif; --font-mono: 'Share Tech Mono', monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font-mono);}
+  #stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(ellipse 70% 50% at 80% 20%,rgba(191,95,255,0.12) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 20% 80%,rgba(0,229,255,0.08) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 60% at 50% 50%,rgba(255,60,172,0.05) 0%,transparent 70%);}
+
+  .prog-strip{position:fixed;top:0;left:0;right:0;height:2px;z-index:30;background:rgba(255,255,255,0.05);}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--neon-blue),var(--neon-pink));transition:width 0.4s ease;width:0%;box-shadow:0 0 8px var(--neon-pink);}
+
+  .topbar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:14px;padding:0.7rem 1.5rem;background:rgba(5,5,20,0.85);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,229,255,0.15);}
+  .topbar-title{font-family:var(--font-head);font-size:10px;letter-spacing:0.2em;color:var(--neon-blue);text-transform:uppercase;flex-shrink:0;text-shadow:0 0 10px rgba(0,229,255,0.6);display:flex;align-items:center;gap:8px;}
+  .topbar-title::before{content:'—';opacity:0.5;}
+  .week-tags{display:flex;gap:8px;align-items:center;flex:1;justify-content:center;}
+  .wtag{font-family:var(--font-head);font-size:9px;letter-spacing:0.15em;padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:transparent;transition:all 0.3s ease;white-space:nowrap;text-transform:uppercase;}
+  .wtag.locked{opacity:0.35;cursor:not-allowed;}
+  .wtag-check{font-size:8px;margin-right:3px;display:none;}
+  .done-tag .wtag-check{display:inline;}
+  .wtag[data-w="1"].active{color:var(--w1);border-color:var(--w1);background:rgba(0,229,255,0.08);box-shadow:0 0 12px rgba(0,229,255,0.3);}
+  .wtag[data-w="2"].active{color:var(--w2);border-color:var(--w2);background:rgba(191,95,255,0.08);box-shadow:0 0 12px rgba(191,95,255,0.3);}
+  .wtag[data-w="3"].active{color:var(--w3);border-color:var(--w3);background:rgba(255,110,199,0.08);box-shadow:0 0 12px rgba(255,110,199,0.3);}
+  .wtag[data-w="4"].active{color:var(--w4);border-color:var(--w4);background:rgba(255,157,61,0.08);box-shadow:0 0 12px rgba(255,157,61,0.3);}
+  .wtag[data-w="1"].done-tag{color:var(--w1);border-color:rgba(0,229,255,0.4);}
+  .wtag[data-w="2"].done-tag{color:var(--w2);border-color:rgba(191,95,255,0.4);}
+  .wtag[data-w="3"].done-tag{color:var(--w3);border-color:rgba(255,110,199,0.4);}
+  .wtag[data-w="4"].done-tag{color:var(--w4);border-color:rgba(255,157,61,0.4);}
+  .topbar-pct{font-family:var(--font-head);font-size:10px;color:var(--neon-blue);flex-shrink:0;text-shadow:0 0 8px rgba(0,229,255,0.5);}
+
+  #slider{position:fixed;inset:0;z-index:1;overflow:hidden;top:50px;}
+  .slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:1.5rem 1.5rem 3rem;visibility:hidden;will-change:transform;}
+  .slide.is-active{visibility:visible;}
+  .slide.is-exiting{visibility:visible;}
+  .slide-inner{width:100%;max-width:700px;}
+
+  .slide-header{margin-bottom:1.25rem;}
+  .slide-week-tag{display:inline-block;font-family:var(--font-head);font-size:10px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:0.6rem;}
+  .slide-title{font-family:var(--font-head);font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;line-height:1.05;letter-spacing:-0.01em;margin-bottom:0.4rem;}
+  .slide-sub{font-family:var(--font-mono);font-size:12px;color:var(--muted);}
+  .s1 .slide-week-tag{color:var(--w1);text-shadow:0 0 10px rgba(0,229,255,0.6);}
+  .s1 .slide-title{color:var(--w1);text-shadow:0 0 30px rgba(0,229,255,0.5),0 0 60px rgba(0,229,255,0.2);}
+  .s2 .slide-week-tag{color:var(--w2);text-shadow:0 0 10px rgba(191,95,255,0.6);}
+  .s2 .slide-title{color:var(--w2);text-shadow:0 0 30px rgba(191,95,255,0.5),0 0 60px rgba(191,95,255,0.2);}
+  .s3 .slide-week-tag{color:var(--w3);text-shadow:0 0 10px rgba(255,110,199,0.6);}
+  .s3 .slide-title{color:var(--w3);text-shadow:0 0 30px rgba(255,110,199,0.5),0 0 60px rgba(255,110,199,0.2);}
+  .s4 .slide-week-tag{color:var(--w4);text-shadow:0 0 10px rgba(255,157,61,0.6);}
+  .s4 .slide-title{color:var(--w4);text-shadow:0 0 30px rgba(255,157,61,0.5),0 0 60px rgba(255,157,61,0.2);}
+
+  .wprog{margin-bottom:1rem;}
+  .wprog-row{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-bottom:5px;}
+  .wprog-track{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
+  .wprog-fill{height:100%;border-radius:2px;transition:width 0.5s ease;width:0%;}
+  .s1 .wprog-fill{background:var(--w1);box-shadow:0 0 8px var(--w1);}
+  .s2 .wprog-fill{background:var(--w2);box-shadow:0 0 8px var(--w2);}
+  .s3 .wprog-fill{background:var(--w3);box-shadow:0 0 8px var(--w3);}
+  .s4 .wprog-fill{background:var(--w4);box-shadow:0 0 8px var(--w4);}
+
+  .days-list{display:flex;flex-direction:column;gap:7px;margin-bottom:0.85rem;}
+  .day-wrap{display:flex;flex-direction:column;transition:opacity 0.38s ease,transform 0.38s cubic-bezier(0.22,1,0.36,1);}
+  .day-wrap.hidden{opacity:0;transform:translateX(28px);}
+  .day{background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);border-radius:12px;display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:default;position:relative;overflow:hidden;transition:border-color 0.25s,background 0.25s,transform 0.25s cubic-bezier(0.22,1,0.36,1),box-shadow 0.25s;}
+  .day::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background 0.25s,box-shadow 0.25s;border-radius:12px 0 0 12px;}
+  .s1 .day:hover::before{background:var(--w1);box-shadow:0 0 10px var(--w1);}
+  .s2 .day:hover::before{background:var(--w2);box-shadow:0 0 10px var(--w2);}
+  .s3 .day:hover::before{background:var(--w3);box-shadow:0 0 10px var(--w3);}
+  .s4 .day:hover::before{background:var(--w4);box-shadow:0 0 10px var(--w4);}
+  .s1 .day:hover{background:rgba(0,229,255,0.07);border-color:rgba(0,229,255,0.35);transform:translateX(5px);box-shadow:0 0 20px rgba(0,229,255,0.08);}
+  .s2 .day:hover{background:rgba(191,95,255,0.07);border-color:rgba(191,95,255,0.35);transform:translateX(5px);box-shadow:0 0 20px rgba(191,95,255,0.08);}
+  .s3 .day:hover{background:rgba(255,110,199,0.07);border-color:rgba(255,110,199,0.35);transform:translateX(5px);box-shadow:0 0 20px rgba(255,110,199,0.08);}
+  .s4 .day:hover{background:rgba(255,157,61,0.07);border-color:rgba(255,157,61,0.35);transform:translateX(5px);box-shadow:0 0 20px rgba(255,157,61,0.08);}
+  .day.done-row{background:rgba(0,229,255,0.04);border-color:rgba(0,229,255,0.18);}
+
+  .check{width:24px;height:24px;border-radius:7px;border:1.5px solid rgba(255,255,255,0.2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;background:transparent;}
+  .check:hover{border-color:var(--neon-blue);background:rgba(0,229,255,0.1);box-shadow:0 0 10px rgba(0,229,255,0.3);}
+  .check.done{background:rgba(0,229,255,0.15);border-color:var(--neon-blue);box-shadow:0 0 12px rgba(0,229,255,0.4);}
+  .check.done::after{content:'';display:block;width:6px;height:10px;border:2px solid var(--neon-blue);border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);filter:drop-shadow(0 0 3px var(--neon-blue));}
+  .day-num{font-family:var(--font-head);font-size:9px;letter-spacing:0.12em;color:var(--muted);min-width:38px;flex-shrink:0;text-transform:uppercase;}
+  .day-text{font-size:13px;line-height:1.55;color:rgba(232,238,255,0.85);font-family:var(--font-mono);flex:1;}
+  .day.done-row .day-text{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(122,133,168,0.4);}
+  code{font-family:var(--font-mono);font-size:11.5px;background:rgba(191,95,255,0.18);color:#d4aaff;padding:1px 6px;border-radius:4px;border:1px solid rgba(191,95,255,0.25);}
+
+  .milestone{border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;font-family:var(--font-mono);font-size:12px;margin-bottom:1rem;background:rgba(255,255,255,0.03);transition:opacity 0.38s ease,transform 0.38s cubic-bezier(0.22,1,0.36,1);}
+  .milestone.hidden{opacity:0;transform:translateX(28px);}
+  .milestone-icon{font-size:18px;flex-shrink:0;}
+  .milestone-label{font-family:var(--font-head);font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:4px;}
+  .milestone-text{color:rgba(232,238,255,0.6);}
+  .s1 .milestone{border:1px solid rgba(0,229,255,0.25);} .s1 .milestone-label{color:var(--w1);text-shadow:0 0 8px rgba(0,229,255,0.5);}
+  .s2 .milestone{border:1px solid rgba(191,95,255,0.25);} .s2 .milestone-label{color:var(--w2);text-shadow:0 0 8px rgba(191,95,255,0.5);}
+  .s3 .milestone{border:1px solid rgba(255,110,199,0.25);} .s3 .milestone-label{color:var(--w3);text-shadow:0 0 8px rgba(255,110,199,0.5);}
+  .s4 .milestone{border:1px solid rgba(255,157,61,0.25);} .s4 .milestone-label{color:var(--w4);text-shadow:0 0 8px rgba(255,157,61,0.5);}
+
+  .cbanner{display:flex;align-items:center;gap:10px;padding:11px 15px;border-radius:12px;font-family:var(--font-mono);font-size:12px;opacity:0;transform:translateY(10px) scale(0.97);transition:opacity 0.45s ease,transform 0.45s cubic-bezier(0.34,1.56,0.64,1);pointer-events:none;}
+  .cbanner.show{opacity:1;transform:translateY(0) scale(1);pointer-events:all;}
+  .s1 .cbanner{background:rgba(0,229,255,0.07);border:1px solid rgba(0,229,255,0.3);box-shadow:0 0 20px rgba(0,229,255,0.08);}
+  .s2 .cbanner{background:rgba(191,95,255,0.07);border:1px solid rgba(191,95,255,0.3);box-shadow:0 0 20px rgba(191,95,255,0.08);}
+  .s3 .cbanner{background:rgba(255,110,199,0.07);border:1px solid rgba(255,110,199,0.3);box-shadow:0 0 20px rgba(255,110,199,0.08);}
+  .s4 .cbanner{background:rgba(255,157,61,0.07);border:1px solid rgba(255,157,61,0.3);box-shadow:0 0 20px rgba(255,157,61,0.08);}
+  .bcrown{font-size:18px;animation:crownFloat 2.4s ease-in-out infinite;filter:drop-shadow(0 0 6px gold);}
+  @keyframes crownFloat{0%,100%{transform:translateY(0) rotate(-6deg);}50%{transform:translateY(-6px) rotate(5deg);}}
+  .btext{color:var(--text);flex:1;font-family:var(--font-head);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;}
+  .nbtn{padding:6px 16px;border-radius:20px;border:none;cursor:pointer;font-family:var(--font-head);font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;transition:transform 0.15s,box-shadow 0.2s;white-space:nowrap;}
+  .nbtn:hover{transform:scale(1.06);}
+  .s1 .nbtn{background:var(--w1);color:#050510;box-shadow:0 0 14px rgba(0,229,255,0.5);}
+  .s2 .nbtn{background:var(--w2);color:#fff;box-shadow:0 0 14px rgba(191,95,255,0.5);}
+  .s3 .nbtn{background:var(--w3);color:#050510;box-shadow:0 0 14px rgba(255,110,199,0.5);}
+  .s4 .nbtn{background:var(--w4);color:#050510;box-shadow:0 0 14px rgba(255,157,61,0.5);}
+
+  /* HINT SYSTEM */
+  .hint-btn{width:28px;height:22px;border-radius:5px;border:1.5px solid rgba(255,255,255,0.15);background:transparent;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s ease;padding:0;margin-left:auto;align-self:center;}
+  .hint-btn svg{width:12px;height:12px;}
+  .hint-btn svg path,.hint-btn svg line{stroke:var(--muted);transition:stroke 0.2s ease;}
+  .hint-btn:hover{border-color:#f6ad55;background:rgba(246,173,85,0.12);transform:scale(1.1);box-shadow:0 0 10px rgba(246,173,85,0.4);}
+  .hint-btn:hover svg path,.hint-btn:hover svg line{stroke:#f6ad55;}
+  .hint-btn.open{border-color:#f6ad55;background:rgba(246,173,85,0.14);box-shadow:0 0 10px rgba(246,173,85,0.4);}
+  .hint-btn.open svg path,.hint-btn.open svg line{stroke:#f6ad55;}
+  .hint-btn.unlocked{border-color:rgba(0,229,255,0.4);background:rgba(0,229,255,0.07);box-shadow:0 0 8px rgba(0,229,255,0.2);}
+  .hint-btn.unlocked svg path,.hint-btn.unlocked svg line{stroke:var(--neon-blue);}
+  .hint-box{max-height:0;overflow:hidden;transition:max-height 0.42s cubic-bezier(0.4,0,0.2,1),opacity 0.3s ease;opacity:0;}
+  .hint-box.open{max-height:340px;opacity:1;}
+  .hint-inner{margin:6px 0 4px 50px;background:rgba(246,173,85,0.05);border:1px solid rgba(246,173,85,0.2);border-radius:10px;padding:10px 12px;}
+  .hint-tip{font-family:var(--font-mono);font-size:11.5px;color:rgba(232,238,255,0.72);line-height:1.65;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(246,173,85,0.15);}
+  .hint-code-label{font-family:var(--font-head);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:#f6ad55;margin-bottom:5px;display:block;text-shadow:0 0 6px rgba(246,173,85,0.5);}
+  .hint-code{display:block;background:rgba(5,5,20,0.9);border:1px solid rgba(255,255,255,0.07);border-radius:7px;padding:9px 11px;font-family:var(--font-mono);font-size:11px;color:#c9b8ff;line-height:1.7;white-space:pre;overflow-x:auto;}
+
+  /* UNLOCK MODAL */
+  #unlock-modal{position:fixed;inset:0;z-index:7000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;visibility:hidden;transition:opacity 0.3s ease,visibility 0.3s ease;}
+  #unlock-modal.open{opacity:1;pointer-events:all;visibility:visible;}
+  .umodal-backdrop{position:absolute;inset:0;background:rgba(2,2,14,0.85);backdrop-filter:blur(8px);}
+  .umodal-card{position:relative;z-index:2;background:rgba(10,10,28,0.98);border:1px solid rgba(0,229,255,0.25);border-radius:18px;padding:1.75rem 1.5rem;max-width:400px;width:92%;text-align:center;box-shadow:0 0 40px rgba(0,229,255,0.1),0 0 80px rgba(191,95,255,0.06);animation:modalPop 0.35s cubic-bezier(0.34,1.56,0.64,1) both;}
+  @keyframes modalPop{from{transform:scale(0.85) translateY(20px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+  .umodal-title{font-family:var(--font-head);font-size:16px;font-weight:900;letter-spacing:0.08em;color:var(--neon-blue);margin-bottom:0.4rem;text-shadow:0 0 16px rgba(0,229,255,0.5);}
+  .umodal-desc{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-bottom:1rem;line-height:1.6;}
+  .umodal-desc strong{color:var(--neon-pink);}
+  .umodal-code{background:rgba(5,5,20,0.95);border:1px solid rgba(191,95,255,0.2);border-radius:10px;padding:12px 14px;margin-bottom:1rem;font-family:var(--font-mono);font-size:12px;color:#c9b8ff;line-height:1.7;white-space:pre;text-align:left;overflow-x:auto;box-shadow:0 0 16px rgba(191,95,255,0.07);}
+  .umodal-input-row{display:flex;gap:8px;margin-bottom:0.6rem;}
+  .umodal-input-row input{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+  .umodal-input-row input:focus{border-color:rgba(0,229,255,0.45);box-shadow:0 0 12px rgba(0,229,255,0.18);}
+  .umodal-input-row button{padding:9px 16px;background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple));border:none;border-radius:8px;color:#050510;font-family:var(--font-head);font-size:14px;font-weight:700;cursor:pointer;transition:transform 0.15s,box-shadow 0.2s;box-shadow:0 0 12px rgba(0,229,255,0.3);}
+  .umodal-input-row button:hover{transform:scale(1.06);}
+  .umodal-msg{font-family:var(--font-mono);font-size:11px;min-height:16px;margin-bottom:0.75rem;transition:all 0.3s;}
+  .umodal-msg.ok{color:var(--neon-blue);text-shadow:0 0 8px rgba(0,229,255,0.5);}
+  .umodal-msg.err{color:#ff4444;}
+  .umodal-cancel{background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:5px 18px;color:var(--muted);font-family:var(--font-head);font-size:9px;letter-spacing:0.1em;cursor:pointer;transition:all 0.2s;}
+  .umodal-cancel:hover{border-color:rgba(255,255,255,0.25);color:var(--text);}
+
+  /* SECRET OVERLAY */
+  #secret-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(2,2,12,0.97);opacity:0;pointer-events:none;visibility:hidden;transition:opacity 0.8s ease,visibility 0.8s ease;}
+  #secret-overlay.visible{opacity:1;pointer-events:all;visibility:visible;}
+  #secret-canvas{position:absolute;inset:0;width:100%;height:100%;}
+  .glitch-line{position:absolute;left:0;right:0;height:2px;pointer-events:none;background:linear-gradient(90deg,transparent,var(--neon-blue),var(--neon-pink),transparent);animation:gscan 3s linear infinite;opacity:0.4;box-shadow:0 0 8px var(--neon-pink);}
+  @keyframes gscan{from{top:-2px;}to{top:100%;}}
+  .secret-card{position:relative;z-index:2;text-align:center;padding:2.5rem 2rem;max-width:500px;width:92%;background:rgba(255,255,255,0.02);border:1px solid rgba(0,229,255,0.2);border-radius:20px;box-shadow:0 0 40px rgba(0,229,255,0.08),0 0 80px rgba(191,95,255,0.06);}
+  .s-lock{font-size:56px;display:block;margin-bottom:0.9rem;opacity:0;animation:lockPop 0.7s cubic-bezier(0.34,1.56,0.64,1) both;animation-delay:0.4s;}
+  @keyframes lockPop{from{opacity:0;transform:scale(0.1) rotate(-40deg);}to{opacity:1;transform:scale(1) rotate(0);}}
+  .s-eye{font-family:var(--font-head);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--neon-blue);margin-bottom:0.6rem;opacity:0;animation:sUp 0.45s ease both;animation-delay:0.75s;text-shadow:0 0 10px rgba(0,229,255,0.6);}
+  .s-title{font-family:var(--font-head);font-size:clamp(1.5rem,5vw,2.4rem);font-weight:900;line-height:1.1;letter-spacing:-0.01em;margin-bottom:0.85rem;opacity:0;animation:sUp 0.45s ease both;animation-delay:0.9s;color:var(--neon-pink);text-shadow:0 0 30px rgba(255,60,172,0.6),0 0 60px rgba(255,60,172,0.3);}
+  .s-desc{font-family:var(--font-mono);font-size:12.5px;color:rgba(232,238,255,0.5);line-height:1.75;margin-bottom:1.4rem;opacity:0;animation:sUp 0.45s ease both;animation-delay:1.05s;}
+  .s-project{background:rgba(255,255,255,0.03);border:1px solid rgba(191,95,255,0.25);border-radius:12px;padding:1rem 1.1rem;margin-bottom:1.6rem;text-align:left;opacity:0;animation:sUp 0.45s ease both;animation-delay:1.2s;box-shadow:0 0 20px rgba(191,95,255,0.05);}
+  .s-project-title{font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:0.1em;color:var(--neon-purple);margin-bottom:0.6rem;display:flex;align-items:center;gap:7px;text-shadow:0 0 8px rgba(191,95,255,0.5);text-transform:uppercase;}
+  .s-steps{list-style:none;}
+  .s-steps li{font-family:var(--font-mono);font-size:11.5px;color:rgba(232,238,255,0.65);padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;gap:9px;align-items:flex-start;}
+  .s-steps li:last-child{border-bottom:none;}
+  .s-num{font-family:var(--font-head);font-size:8px;color:var(--neon-purple);min-width:16px;margin-top:3px;flex-shrink:0;}
+  .s-close{display:inline-flex;align-items:center;gap:7px;padding:12px 28px;background:linear-gradient(135deg,var(--neon-blue),var(--neon-pink));border:none;border-radius:50px;color:#050510;font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;opacity:0;animation:sUp 0.45s ease both;animation-delay:1.35s;transition:transform 0.15s,box-shadow 0.2s;box-shadow:0 0 20px rgba(0,229,255,0.4),0 0 40px rgba(255,60,172,0.2);}
+  .s-close:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(0,229,255,0.6),0 0 60px rgba(255,60,172,0.3);}
+  @keyframes sUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+  /* SPLASH SCREEN */
+  #splash {
+    position: fixed; inset: 0; z-index: 99999;
+    display: flex; align-items: center; justify-content: center;
+    background: #050510;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #splash.hidden { opacity: 0; visibility: hidden; }
+  .splash-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,229,255,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 70%, rgba(191,95,255,0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 20% 30%, rgba(255,60,172,0.07) 0%, transparent 60%);
+  }
+  .splash-content { position: relative; z-index: 1; text-align: center; padding: 2rem; }
+  .splash-icon {
+    font-size: 72px; display: block; margin-bottom: 1rem;
+    animation: splashBounce 0.8s cubic-bezier(0.34,1.56,0.64,1) both;
+    animation-delay: 0.1s; opacity: 0;
+    filter: drop-shadow(0 0 20px rgba(0,229,255,0.4));
+  }
+  @keyframes splashBounce { from{opacity:0;transform:scale(0.3) rotate(-20deg);} to{opacity:1;transform:scale(1) rotate(0);} }
+  .splash-title {
+    font-family: var(--font-head); font-size: 2.2rem; font-weight: 900;
+    letter-spacing: -0.02em; color: var(--neon-blue);
+    text-shadow: 0 0 30px rgba(0,229,255,0.6), 0 0 60px rgba(0,229,255,0.2);
+    opacity: 0; animation: sUp 0.5s ease both; animation-delay: 0.4s;
+    margin-bottom: 0.4rem;
+  }
+  .splash-sub {
+    font-family: var(--font-mono); font-size: 13px; color: var(--muted);
+    opacity: 0; animation: sUp 0.5s ease both; animation-delay: 0.6s;
+    margin-bottom: 2rem; letter-spacing: 0.1em;
+  }
+  .splash-bar {
+    width: 160px; height: 2px; background: rgba(255,255,255,0.08);
+    border-radius: 2px; overflow: hidden; margin: 0 auto;
+    opacity: 0; animation: sUp 0.5s ease both; animation-delay: 0.7s;
+  }
+  .splash-bar-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+    box-shadow: 0 0 8px var(--neon-blue);
+    transition: width 1.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+
+  /* ── SPLASH SCREEN ── */
+  #splash {
+    position: fixed; inset: 0; z-index: 99999;
+    background: #050510;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 1.5rem;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #splash.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .splash-icon {
+    width: 90px; height: 90px; border-radius: 22px;
+    background: linear-gradient(135deg, #050510 0%, #1a0a3a 100%);
+    border: 2px solid rgba(0,229,255,0.4);
+    box-shadow: 0 0 30px rgba(0,229,255,0.3), 0 0 60px rgba(191,95,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px;
+    animation: iconPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes iconPulse {
+    0%,100% { box-shadow: 0 0 30px rgba(0,229,255,0.3), 0 0 60px rgba(191,95,255,0.2); }
+    50%      { box-shadow: 0 0 50px rgba(0,229,255,0.6), 0 0 100px rgba(191,95,255,0.4); }
+  }
+  .splash-title {
+    font-family: 'Orbitron', sans-serif; font-size: 22px; font-weight: 900;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    background: linear-gradient(135deg, #00e5ff, #bf5fff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    text-shadow: none;
+  }
+  .splash-sub {
+    font-family: 'Share Tech Mono', monospace; font-size: 12px;
+    color: rgba(122,133,168,0.8); letter-spacing: 0.1em;
+  }
+  .splash-bar-wrap {
+    width: 160px; height: 2px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden;
+  }
+  .splash-bar {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #00e5ff, #bf5fff);
+    box-shadow: 0 0 8px #00e5ff;
+    animation: splashLoad 1.8s cubic-bezier(0.4,0,0.2,1) forwards;
+  }
+  @keyframes splashLoad { from{width:0%} to{width:100%} }
+
+</style>
+
+<meta name="theme-color" content="#050510"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Python Plan"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="splash-bg"></div>
+  <div class="splash-content">
+    <div class="splash-icon">🐍</div>
+    <div class="splash-title">Python Plan</div>
+    <div class="splash-sub">4 weeks · 20 days · 1 goal</div>
+    <div class="splash-bar"><div class="splash-bar-fill" id="splash-fill"></div></div>
+  </div>
+</div>
+
+<div id="splash">
+  <div class="splash-icon">🐍</div>
+  <div class="splash-title">PyPlan</div>
+  <div class="splash-sub">// python · 4 weeks</div>
+  <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+</div>
+
+<canvas id="stars"></canvas>
+<div class="prog-strip"><div class="prog-fill" id="gpfill"></div></div>
+
+<div class="topbar">
+  <div class="topbar-title">Python · 4 Weeks</div>
+  <div class="week-tags">
+    <div class="wtag active" data-w="1" onclick="goTo(1)"><span class="wtag-check">✓</span>WK 01</div>
+    <div class="wtag locked" data-w="2" onclick="goTo(2)"><span class="wtag-check">✓</span>WK 02</div>
+    <div class="wtag locked" data-w="3" onclick="goTo(3)"><span class="wtag-check">✓</span>WK 03</div>
+    <div class="wtag locked" data-w="4" onclick="goTo(4)"><span class="wtag-check">✓</span>WK 04</div>
+  </div>
+  <div class="topbar-pct"><span id="gpct">0</span>%</div>
+</div>
+
+<div id="slider">
+
+<!-- SLIDE 1 -->
+<div class="slide s1 is-active" data-week="1" style="transform:translateX(0)">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="slide-week-tag">Week 01</div>
+      <div class="slide-title">Python Foundations</div>
+      <div class="slide-sub">Days 1–5 · syntax, types, loops, lists</div>
+    </div>
+    <div class="wprog">
+      <div class="wprog-row"><span id="l1">0 / 5 done</span><span id="p1">0%</span></div>
+      <div class="wprog-track"><div class="wprog-fill" id="f1"></div></div>
+    </div>
+    <div class="days-list" id="d1">
+      <div class="day-wrap" id="dw1"><div class="day"><div class="check" onclick="tick(this,1)"></div><span class="day-num">day 01</span><span class="day-text">Install Python + VS Code, run your first script — print "Hello, world!"</span><button class="hint-btn" onmouseenter="showHint(1)" onmouseleave="schedHide(1)" id="hb1"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox1" onmouseenter="keepHint(1)" onmouseleave="schedHide(1)"><div class="hint-inner"><p class="hint-tip" id="htip1"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode1"></code></div></div></div>
+      <div class="day-wrap" id="dw2"><div class="day"><div class="check" onclick="tick(this,1)"></div><span class="day-num">day 02</span><span class="day-text">Variables, data types — strings, ints, floats, booleans</span><button class="hint-btn" onmouseenter="showHint(2)" onmouseleave="schedHide(2)" id="hb2"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox2" onmouseenter="keepHint(2)" onmouseleave="schedHide(2)"><div class="hint-inner"><p class="hint-tip" id="htip2"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode2"></code></div></div></div>
+      <div class="day-wrap" id="dw3"><div class="day"><div class="check" onclick="tick(this,1)"></div><span class="day-num">day 03</span><span class="day-text">User input + <code>if/elif/else</code> conditionals</span><button class="hint-btn" onmouseenter="showHint(3)" onmouseleave="schedHide(3)" id="hb3"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox3" onmouseenter="keepHint(3)" onmouseleave="schedHide(3)"><div class="hint-inner"><p class="hint-tip" id="htip3"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode3"></code></div></div></div>
+      <div class="day-wrap" id="dw4"><div class="day"><div class="check" onclick="tick(this,1)"></div><span class="day-num">day 04</span><span class="day-text"><code>for</code> and <code>while</code> loops, <code>break</code> and <code>continue</code></span><button class="hint-btn" onmouseenter="showHint(4)" onmouseleave="schedHide(4)" id="hb4"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox4" onmouseenter="keepHint(4)" onmouseleave="schedHide(4)"><div class="hint-inner"><p class="hint-tip" id="htip4"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode4"></code></div></div></div>
+      <div class="day-wrap" id="dw5"><div class="day"><div class="check" onclick="tick(this,1)"></div><span class="day-num">day 05</span><span class="day-text">Lists — indexing, slicing, <code>append</code>, <code>remove</code></span><button class="hint-btn" onmouseenter="showHint(5)" onmouseleave="schedHide(5)" id="hb5"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox5" onmouseenter="keepHint(5)" onmouseleave="schedHide(5)"><div class="hint-inner"><p class="hint-tip" id="htip5"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode5"></code></div></div></div>
+    </div>
+    <div class="milestone" id="ms1"><span class="milestone-icon">🎯</span><div><span class="milestone-label">Week 1 milestone</span><span class="milestone-text">Build a number guessing game using input + loops + conditions</span></div></div>
+    <div class="cbanner" id="cb1"><span class="bcrown">👑</span><span class="btext">Week 1 complete!</span><button class="nbtn" onclick="goTo(2)">Week 2 →</button></div>
+  </div>
+</div>
+
+<!-- SLIDE 2 -->
+<div class="slide s2" data-week="2" style="transform:translateX(100%)">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="slide-week-tag">Week 02</div>
+      <div class="slide-title">Core Building Blocks</div>
+      <div class="slide-sub">Days 6–10 · dicts, functions, files, errors</div>
+    </div>
+    <div class="wprog">
+      <div class="wprog-row"><span id="l2">0 / 5 done</span><span id="p2">0%</span></div>
+      <div class="wprog-track"><div class="wprog-fill" id="f2"></div></div>
+    </div>
+    <div class="days-list" id="d2">
+      <div class="day-wrap" id="dw6"><div class="day"><div class="check" onclick="tick(this,2)"></div><span class="day-num">day 06</span><span class="day-text">Dictionaries and sets — key-value pairs, lookups</span><button class="hint-btn" onmouseenter="showHint(6)" onmouseleave="schedHide(6)" id="hb6"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox6" onmouseenter="keepHint(6)" onmouseleave="schedHide(6)"><div class="hint-inner"><p class="hint-tip" id="htip6"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode6"></code></div></div></div>
+      <div class="day-wrap" id="dw7"><div class="day"><div class="check" onclick="tick(this,2)"></div><span class="day-num">day 07</span><span class="day-text">Functions — defining, calling, parameters, return values</span><button class="hint-btn" onmouseenter="showHint(7)" onmouseleave="schedHide(7)" id="hb7"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox7" onmouseenter="keepHint(7)" onmouseleave="schedHide(7)"><div class="hint-inner"><p class="hint-tip" id="htip7"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode7"></code></div></div></div>
+      <div class="day-wrap" id="dw8"><div class="day"><div class="check" onclick="tick(this,2)"></div><span class="day-num">day 08</span><span class="day-text">Scope, default arguments, and basic string formatting</span><button class="hint-btn" onmouseenter="showHint(8)" onmouseleave="schedHide(8)" id="hb8"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox8" onmouseenter="keepHint(8)" onmouseleave="schedHide(8)"><div class="hint-inner"><p class="hint-tip" id="htip8"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode8"></code></div></div></div>
+      <div class="day-wrap" id="dw9"><div class="day"><div class="check" onclick="tick(this,2)"></div><span class="day-num">day 09</span><span class="day-text">Reading and writing files — <code>open</code>, <code>read</code>, <code>write</code>, <code>with</code> statement</span><button class="hint-btn" onmouseenter="showHint(9)" onmouseleave="schedHide(9)" id="hb9"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox9" onmouseenter="keepHint(9)" onmouseleave="schedHide(9)"><div class="hint-inner"><p class="hint-tip" id="htip9"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode9"></code></div></div></div>
+      <div class="day-wrap" id="dw10"><div class="day"><div class="check" onclick="tick(this,2)"></div><span class="day-num">day 10</span><span class="day-text">Error handling — <code>try/except</code>, common exceptions</span><button class="hint-btn" onmouseenter="showHint(10)" onmouseleave="schedHide(10)" id="hb10"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox10" onmouseenter="keepHint(10)" onmouseleave="schedHide(10)"><div class="hint-inner"><p class="hint-tip" id="htip10"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode10"></code></div></div></div>
+    </div>
+    <div class="milestone" id="ms2"><span class="milestone-icon">🎯</span><div><span class="milestone-label">Week 2 milestone</span><span class="milestone-text">Build a to-do list app that saves tasks to a .txt file</span></div></div>
+    <div class="cbanner" id="cb2"><span class="bcrown">👑</span><span class="btext">Week 2 complete!</span><button class="nbtn" onclick="goTo(3)">Week 3 →</button></div>
+  </div>
+</div>
+
+<!-- SLIDE 3 -->
+<div class="slide s3" data-week="3" style="transform:translateX(100%)">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="slide-week-tag">Week 03</div>
+      <div class="slide-title">Libraries + Real-World Python</div>
+      <div class="slide-sub">Days 11–15 · modules, pip, JSON, OOP basics</div>
+    </div>
+    <div class="wprog">
+      <div class="wprog-row"><span id="l3">0 / 5 done</span><span id="p3">0%</span></div>
+      <div class="wprog-track"><div class="wprog-fill" id="f3"></div></div>
+    </div>
+    <div class="days-list" id="d3">
+      <div class="day-wrap" id="dw11"><div class="day"><div class="check" onclick="tick(this,3)"></div><span class="day-num">day 11</span><span class="day-text">Modules and imports — <code>math</code>, <code>random</code>, <code>datetime</code></span><button class="hint-btn" onmouseenter="showHint(11)" onmouseleave="schedHide(11)" id="hb11"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox11" onmouseenter="keepHint(11)" onmouseleave="schedHide(11)"><div class="hint-inner"><p class="hint-tip" id="htip11"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode11"></code></div></div></div>
+      <div class="day-wrap" id="dw12"><div class="day"><div class="check" onclick="tick(this,3)"></div><span class="day-num">day 12</span><span class="day-text">Install and use <code>pip</code> packages — e.g. <code>requests</code> for web APIs</span><button class="hint-btn" onmouseenter="showHint(12)" onmouseleave="schedHide(12)" id="hb12"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox12" onmouseenter="keepHint(12)" onmouseleave="schedHide(12)"><div class="hint-inner"><p class="hint-tip" id="htip12"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode12"></code></div></div></div>
+      <div class="day-wrap" id="dw13"><div class="day"><div class="check" onclick="tick(this,3)"></div><span class="day-num">day 13</span><span class="day-text">Working with JSON — parse, read, write</span><button class="hint-btn" onmouseenter="showHint(13)" onmouseleave="schedHide(13)" id="hb13"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox13" onmouseenter="keepHint(13)" onmouseleave="schedHide(13)"><div class="hint-inner"><p class="hint-tip" id="htip13"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode13"></code></div></div></div>
+      <div class="day-wrap" id="dw14"><div class="day"><div class="check" onclick="tick(this,3)"></div><span class="day-num">day 14</span><span class="day-text">List comprehensions + intro to classes and objects (OOP basics)</span><button class="hint-btn" onmouseenter="showHint(14)" onmouseleave="schedHide(14)" id="hb14"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox14" onmouseenter="keepHint(14)" onmouseleave="schedHide(14)"><div class="hint-inner"><p class="hint-tip" id="htip14"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode14"></code></div></div></div>
+      <div class="day-wrap" id="dw15"><div class="day"><div class="check" onclick="tick(this,3)"></div><span class="day-num">day 15</span><span class="day-text">Pick your project idea and map out the features you'll build</span><button class="hint-btn" onmouseenter="showHint(15)" onmouseleave="schedHide(15)" id="hb15"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox15" onmouseenter="keepHint(15)" onmouseleave="schedHide(15)"><div class="hint-inner"><p class="hint-tip" id="htip15"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode15"></code></div></div></div>
+    </div>
+    <div class="milestone" id="ms3"><span class="milestone-icon">🎯</span><div><span class="milestone-label">Week 3 milestone</span><span class="milestone-text">Fetch data from a free public API and display it nicely</span></div></div>
+    <div class="cbanner" id="cb3"><span class="bcrown">👑</span><span class="btext">Week 3 complete!</span><button class="nbtn" onclick="goTo(4)">Week 4 →</button></div>
+  </div>
+</div>
+
+<!-- SLIDE 4 -->
+<div class="slide s4" data-week="4" style="transform:translateX(100%)">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="slide-week-tag">Week 04</div>
+      <div class="slide-title">Build Your Project</div>
+      <div class="slide-sub">Days 16–20 · ship something real</div>
+    </div>
+    <div class="wprog">
+      <div class="wprog-row"><span id="l4">0 / 5 done</span><span id="p4">0%</span></div>
+      <div class="wprog-track"><div class="wprog-fill" id="f4"></div></div>
+    </div>
+    <div class="days-list" id="d4">
+      <div class="day-wrap" id="dw16"><div class="day"><div class="check" onclick="tick(this,4)"></div><span class="day-num">day 16</span><span class="day-text">Set up project structure, write core logic (skeleton + functions)</span><button class="hint-btn" onmouseenter="showHint(16)" onmouseleave="schedHide(16)" id="hb16"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox16" onmouseenter="keepHint(16)" onmouseleave="schedHide(16)"><div class="hint-inner"><p class="hint-tip" id="htip16"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode16"></code></div></div></div>
+      <div class="day-wrap" id="dw17"><div class="day"><div class="check" onclick="tick(this,4)"></div><span class="day-num">day 17</span><span class="day-text">Build main features — connect all the pieces</span><button class="hint-btn" onmouseenter="showHint(17)" onmouseleave="schedHide(17)" id="hb17"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox17" onmouseenter="keepHint(17)" onmouseleave="schedHide(17)"><div class="hint-inner"><p class="hint-tip" id="htip17"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode17"></code></div></div></div>
+      <div class="day-wrap" id="dw18"><div class="day"><div class="check" onclick="tick(this,4)"></div><span class="day-num">day 18</span><span class="day-text">Handle edge cases, add input validation, improve error messages</span><button class="hint-btn" onmouseenter="showHint(18)" onmouseleave="schedHide(18)" id="hb18"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox18" onmouseenter="keepHint(18)" onmouseleave="schedHide(18)"><div class="hint-inner"><p class="hint-tip" id="htip18"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode18"></code></div></div></div>
+      <div class="day-wrap" id="dw19"><div class="day"><div class="check" onclick="tick(this,4)"></div><span class="day-num">day 19</span><span class="day-text">Refactor and clean up your code, add comments</span><button class="hint-btn" onmouseenter="showHint(19)" onmouseleave="schedHide(19)" id="hb19"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox19" onmouseenter="keepHint(19)" onmouseleave="schedHide(19)"><div class="hint-inner"><p class="hint-tip" id="htip19"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode19"></code></div></div></div>
+      <div class="day-wrap" id="dw20"><div class="day"><div class="check" onclick="tick(this,4)"></div><span class="day-num">day 20</span><span class="day-text">Demo and reflect — what worked, what to learn next</span><button class="hint-btn" onmouseenter="showHint(20)" onmouseleave="schedHide(20)" id="hb20"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/><line x1="9" y1="21" x2="9" y2="18"/><line x1="15" y1="21" x2="15" y2="18"/></svg></button></div><div class="hint-box" id="hbox20" onmouseenter="keepHint(20)" onmouseleave="schedHide(20)"><div class="hint-inner"><p class="hint-tip" id="htip20"></p><span class="hint-code-label">// related example</span><code class="hint-code" id="hcode20"></code></div></div></div>
+    </div>
+    <div class="milestone" id="ms4"><span class="milestone-icon">🚀</span><div><span class="milestone-label">Final milestone</span><span class="milestone-text">A working Python project you built yourself — from scratch!</span></div></div>
+    <div class="cbanner" id="cb4"><span class="bcrown">👑</span><span class="btext">All 4 weeks done — you're a Pythonista!</span><button class="nbtn" id="secret-btn" onclick="tryOpenSecret()">Unlock secret ✦</button></div>
+  </div>
+</div>
+
+</div><!-- /slider -->
+
+<!-- SECRET OVERLAY -->
+<div id="secret-overlay">
+  <canvas id="secret-canvas"></canvas>
+  <div class="glitch-line"></div>
+  <div class="secret-card">
+    <span class="s-lock">🔓</span>
+    <div class="s-eye">// secret project unlocked</div>
+    <div class="s-title">Personal Finance Tracker</div>
+    <p class="s-desc">You've mastered 4 weeks of Python. Now build a real CLI app that ties everything together — files, APIs, JSON, functions, and user interaction.</p>
+    <div class="s-project">
+      <div class="s-project-title">💰 CLI Finance Tracker</div>
+      <ul class="s-steps">
+        <li><span class="s-num">01</span>Log income and expenses by category to a JSON file</li>
+        <li><span class="s-num">02</span>Filter and summarise by month, show category totals</li>
+        <li><span class="s-num">03</span>Fetch live exchange rates via API and convert amounts</li>
+        <li><span class="s-num">04</span>Export a monthly report as a .csv file</li>
+        <li><span class="s-num">05</span>Add a CLI menu loop with clean input validation</li>
+      </ul>
+    </div>
+    <button class="s-close" onclick="closeSecret()">Let's build it &#10140;</button>
+  </div>
+</div>
+
+<!-- UNLOCK MODAL -->
+<div id="unlock-modal">
+  <div class="umodal-backdrop" onclick="closeUnlockModal()"></div>
+  <div class="umodal-card">
+    <div class="umodal-title">Unlock Hints</div>
+    <p class="umodal-desc">What does this code print? — <strong id="umodal-day">Day 1</strong></p>
+    <pre class="umodal-code" id="umodal-code"></pre>
+    <div class="umodal-input-row">
+      <input type="text" id="umodal-input" placeholder="Type the output..." autocomplete="off"/>
+      <button onclick="submitUnlock()">→</button>
+    </div>
+    <div class="umodal-msg" id="umodal-msg"></div>
+    <button class="umodal-cancel" onclick="closeUnlockModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var c=document.getElementById('stars'),ctx=c.getContext('2d');
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;draw();}
+  function draw(){ctx.clearRect(0,0,c.width,c.height);for(var i=0;i<260;i++){var x=Math.random()*c.width,y=Math.random()*c.height,r=Math.random()*1.2+0.2,a=Math.random()*0.7+0.1;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,'+a+')';ctx.fill();}}
+  window.addEventListener('resize',resize);resize();
+})();
+
+const CHALLENGES={1:{code:'print("Hello")',answer:"Hello"},2:{code:'x = 5\nprint(type(x))',answer:"<class 'int'>"},3:{code:'x = 10\nif x > 5:\n    print("yes")',answer:"yes"},4:{code:'for i in range(3):\n    print(i)',answer:"0\n1\n2"},5:{code:'a = [1,2,3]\nprint(a[-1])',answer:"3"},6:{code:'d = {"a":1}\nprint(d["a"])',answer:"1"},7:{code:'def hi():\n    return "hi"\nprint(hi())',answer:"hi"},8:{code:'name = "Ada"\nprint(f"Hello {name}")',answer:"Hello Ada"},9:{code:'print("r" in "read")',answer:"True"},10:{code:'try:\n    print(1/0)\nexcept:\n    print("err")',answer:"err"},11:{code:'import math\nprint(math.floor(3.9))',answer:"3"},12:{code:'print("pip"[0])',answer:"p"},13:{code:'import json\nprint(json.dumps({"a":1}))',answer:'{"a": 1}'},14:{code:'print([x*2 for x in range(3)])',answer:"[0, 2, 4]"},15:{code:'plan = ["a","b","c"]\nprint(len(plan))',answer:"3"},16:{code:'def run():\n    pass\nprint(run())',answer:"None"},17:{code:'x = [1,2,3]\nx.append(4)\nprint(x[3])',answer:"4"},18:{code:'print("ok".upper())',answer:"OK"},19:{code:'print("  hello  ".strip())',answer:"hello"},20:{code:'print("🐍" * 3)',answer:"🐍🐍🐍"}};
+
+const HINTS={1:[{tip:"Python files end in .py — run them with 'python filename.py' in your terminal.",code:'name = input("What\'s your name? ")\nprint("Hello,", name, "!")'},{tip:"Use print() to show any value. You can print multiple things separated by commas.",code:'x = 42\nprint("The answer is", x)'},{tip:"Comments start with # and are ignored by Python — use them to explain your code.",code:'# This is a comment\nprint("Hello!")  # inline comment'},{tip:"The most important command to memorise early on is 'print'. Try running a file that stores the word SCRIPT as a variable and prints it.",code:'keyword = "SCRIPT"\nprint("Today\'s word:", keyword)'}],2:[{tip:"Variables store values. Python detects the type automatically.",code:'age = 25\nname = "Ada"\nprint(name, "is", age)'},{tip:"You can reassign a variable at any time — its type can even change.",code:'x = 10\nprint(x)\nx = "hello"\nprint(x)'},{tip:"Use type() to check what type a variable is.",code:'print(type(42))\nprint(type("hi"))\nprint(type(3.14))'},{tip:"Naming variables well matters. A variable called VARIABLE is itself a valid Python name.",code:'VARIABLE = "any value"\nprint(VARIABLE)'}],3:[{tip:"input() always returns a string. Use int() to convert before doing math.",code:'score = int(input("Score: "))\nif score >= 90:\n    print("A!")'},{tip:"You can chain conditions with 'and' / 'or' to check multiple things.",code:'age = 20\nhas_id = True\nif age >= 18 and has_id:\n    print("Access granted")'},{tip:"The 'not' keyword inverts a boolean condition.",code:'logged_in = False\nif not logged_in:\n    print("Please log in")'},{tip:"Every if-statement is built around a CONDITION — a test that is either True or False.",code:'CONDITION = 5 > 3\nif CONDITION:\n    print("It is true!")'}],4:[{tip:"range(n) gives 0 to n-1. Use break to exit a loop early.",code:'for i in range(1, 6):\n    if i == 3:\n        continue\n    print(i)'},{tip:"while loops keep running as long as a condition is True.",code:'count = 0\nwhile count < 3:\n    print("count:", count)\n    count += 1'},{tip:"Use enumerate() to get both index and value when looping.",code:'fruits = ["apple", "banana", "cherry"]\nfor i, fruit in enumerate(fruits):\n    print(i, fruit)'},{tip:"All repetition in code comes back to one idea: the LOOP. Master it and you control flow.",code:'LOOP = ["repeat", "repeat", "repeat"]\nfor item in LOOP:\n    print(item)'}],5:[{tip:"Lists are ordered and mutable. Negative indexes count from the end.",code:'fruits = ["apple", "banana", "cherry"]\nfruits.append("mango")\nprint(fruits[-1])'},{tip:"Use len() to get the number of items, and 'in' to check existence.",code:'nums = [1, 2, 3, 4, 5]\nprint(len(nums))\nprint(3 in nums)'},{tip:"sorted() returns a new sorted list without changing the original.",code:'scores = [85, 42, 99, 71]\nprint(sorted(scores))'},{tip:"The most versatile data structure for beginners is the LIST.",code:'LIST = [1, 2, 3, 4, 5]\nprint(LIST[0], LIST[-1])'}],6:[{tip:"Dictionaries use keys instead of positions. Use .get() to safely read a key.",code:'person = {"name": "Maya", "age": 28}\nprint(person.get("city", "n/a"))'},{tip:"Loop over a dict with .items() to get both key and value.",code:'scores = {"Ali": 95, "Sara": 88}\nfor name, score in scores.items():\n    print(name, score)'},{tip:"Use 'in' to check if a key exists before accessing it.",code:'data = {"x": 10}\nif "z" in data:\n    print(data["z"])\nelse:\n    print("not found")'},{tip:"When you need to look something up by name rather than position, reach for a DICT.",code:'DICT = {"key": "value", "language": "Python"}\nprint(DICT["language"])'}],7:[{tip:"Functions let you reuse code. Use return to pass a value back.",code:'def greet(name, greeting="Hello"):\n    return f"{greeting}, {name}!"\nprint(greet("Ali"))'},{tip:"*args lets a function accept any number of positional arguments.",code:'def add_all(*nums):\n    return sum(nums)\nprint(add_all(1, 2, 3))'},{tip:"Functions are first-class — you can pass them as arguments.",code:'def double(x): return x * 2\ndef apply(func, val): return func(val)\nprint(apply(double, 5))'},{tip:"Every reusable block of logic in Python is wrapped in a FUNCTION.",code:'def FUNCTION():\n    return "I am reusable"\nprint(FUNCTION())'}],8:[{tip:"Variables inside a function are local — they can't be accessed from outside.",code:'def format_price(amount, currency="USD"):\n    return f"{currency} {amount:.2f}"\nprint(format_price(9.5))'},{tip:"f-strings are the cleanest way to embed variables into strings.",code:'name = "Ali"\nage = 25\nprint(f"My name is {name}, I am {age}")'},{tip:"Use default arguments to make functions flexible.",code:'def connect(host, port=8080, ssl=True):\n    return f"{host}:{port}"\nprint(connect("example.com"))'},{tip:"Understanding where a variable lives — its SCOPE — prevents confusing bugs.",code:'x = "global"\ndef check():\n    SCOPE = "local"\n    print(SCOPE)\ncheck()'}],9:[{tip:"Always use 'with open()' — it closes the file automatically.",code:'with open("notes.txt", "w") as f:\n    f.write("My first note\\n")\nwith open("notes.txt") as f:\n    print(f.read())'},{tip:"Use 'a' mode to append without overwriting existing content.",code:'with open("log.txt", "a") as f:\n    f.write("New entry\\n")'},{tip:"readlines() returns a list of lines — handy for processing line by line.",code:'with open("data.txt") as f:\n    lines = f.readlines()\nprint(lines[0].strip())'},{tip:"Reading from disk is called file I/O. The pattern to remember is FILEREADER.",code:'FILEREADER = open("notes.txt", "r")\ndata = FILEREADER.read()\nFILEREADER.close()'}],10:[{tip:"Wrap risky code in try/except. Catch specific errors for clean messages.",code:'try:\n    print(1/0)\nexcept ZeroDivisionError:\n    print("Can\'t divide by zero!")'},{tip:"The 'finally' block always runs — great for cleanup.",code:'try:\n    f = open("data.txt")\nexcept FileNotFoundError:\n    print("Missing!")\nfinally:\n    print("Done")'},{tip:"You can raise your own exceptions to signal errors.",code:'def set_age(age):\n    if age < 0:\n        raise ValueError("Negative age")\n    return age'},{tip:"When something goes wrong at runtime, Python raises an EXCEPTION.",code:'try:\n    1/0\nexcept ZeroDivisionError as EXCEPTION:\n    print("Caught:", EXCEPTION)'}],11:[{tip:"The standard library has modules for almost everything — no install needed.",code:'import random, datetime\nprint(random.randint(1,100))\nprint(datetime.date.today())'},{tip:"math module gives constants and functions for numeric operations.",code:'import math\nprint(math.pi)\nprint(math.sqrt(16))\nprint(math.floor(3.7))'},{tip:"os module lets you interact with the file system.",code:'import os\nprint(os.getcwd())\nprint(os.listdir("."))'},{tip:"Any .py file you import is a MODULE. Python ships with hundreds built in.",code:'import math\nMODULE = math\nprint(MODULE.pi)'}],12:[{tip:"pip is Python's package manager. Install once, import anywhere.",code:'# pip install requests\nimport requests\nres = requests.get("https://httpbin.org/json")\nprint(res.status_code)'},{tip:"Check status before using response data — 200 means success.",code:'import requests\nres = requests.get("https://httpbin.org/get")\nif res.status_code == 200:\n    print("OK")'},{tip:"Pass params as a dict instead of building the URL manually.",code:'import requests\nparams = {"q": "python"}\nres = requests.get("https://httpbin.org/get", params=params)\nprint(res.url)'},{tip:"The most popular library for fetching web data is REQUESTS.",code:'import requests\nREQUESTS = requests.get("https://httpbin.org/get")\nprint(REQUESTS.status_code)'}],13:[{tip:"JSON is text that looks like a Python dict.",code:'import json\ndata = {"user": "Ali", "score": 42}\ntext = json.dumps(data, indent=2)\nprint(text)'},{tip:"Save a dict to a JSON file and load it back easily.",code:'import json\ndata = {"tasks": ["buy milk"]}\nwith open("data.json", "w") as f:\n    json.dump(data, f)'},{tip:"Use indent=2 in json.dumps() to make output human-readable.",code:'import json\nuser = {"name": "Sara", "scores": [95, 88]}\nprint(json.dumps(user, indent=2))'},{tip:"Data exchanged between apps is usually formatted as JSON.",code:'import json\nJSON = {"lang": "Python", "level": "beginner"}\nprint(json.dumps(JSON, indent=2))'}],14:[{tip:"List comprehensions build a new list in one line.",code:'squares = [n**2 for n in range(1, 6)]\nprint(squares)'},{tip:"Classes bundle data and behaviour — use __init__ to set up the object.",code:'class Dog:\n    def __init__(self, name):\n        self.name = name\n    def bark(self):\n        return f"{self.name}: woof!"\nprint(Dog("Rex").bark())'},{tip:"Use dict comprehensions to build dicts the same way.",code:'names = ["Ali", "Sara"]\nlengths = {n: len(n) for n in names}\nprint(lengths)'},{tip:"Building a list from another in one line is called a COMPREHEND-ion.",code:'words = ["hello", "world"]\nCOMPREHEND = [w.upper() for w in words]\nprint(COMPREHEND)'}],15:[{tip:"Start with just 3 core features. Choose libraries before touching code.",code:'project = {\n    "name": "Weather App",\n    "features": ["fetch", "display", "save"]\n}'},{tip:"Draw a simple flow diagram — what does the user do first, second, third?",code:'# 1. Start app\n# 2. Enter city\n# 3. Fetch weather\n# 4. Display\n# 5. Save or quit'},{tip:"Write your project as one sentence: 'A CLI app that does X using Y.'",code:'# A CLI quiz app that loads questions\n# from JSON and tracks the score.'},{tip:"Every project starts as a BLUEPRINT — a plan before a single line of code.",code:'BLUEPRINT = {\n    "name": "My App",\n    "features": ["input", "process", "output"]\n}'}],16:[{tip:"Write empty functions with 'pass' first — skeleton before logic.",code:'def load_data(): pass\ndef save_data(data): pass\ndef main():\n    data = load_data()\n    save_data(data)\nmain()'},{tip:"Use a main() function as the entry point — keeps code organised.",code:'def get_input(): pass\ndef process(data): pass\ndef main():\n    raw = get_input()\n    process(raw)\nmain()'},{tip:"Keep each function doing exactly one thing — easier to test.",code:'def read_file(path):\n    with open(path) as f:\n        return f.read()\ndef parse(text):\n    return text.strip().split("\\n")'},{tip:"Before filling in logic, write a SKELETON — empty functions with just pass.",code:'def SKELETON(): pass\nSKELETON()  # does nothing yet'}],17:[{tip:"Build one feature at a time and test it before moving on.",code:'def add_task(tasks, name):\n    tasks.append({"name": name, "done": False})\n    return tasks\ntasks = add_task([], "Buy milk")\nprint(tasks)'},{tip:"Print intermediate values while building — remove them when done.",code:'def calculate(a, b):\n    print("DEBUG:", a, b)\n    return a * b + 10\ncalculate(3, 4)'},{tip:"Test your functions with a few known inputs before connecting everything.",code:'def double(n): return n * 2\nprint(double(0) == 0)\nprint(double(5) == 10)'},{tip:"A program is built one FEATURE at a time. Never build everything at once.",code:'def FEATURE(data):\n    """One small piece of the app."""\n    return data.strip().lower()\nprint(FEATURE("  Hello  "))'}],18:[{tip:"Think about what could go wrong — empty inputs, wrong types, missing files.",code:'def get_age():\n    while True:\n        try:\n            age = int(input("Age: "))\n            if age < 0: raise ValueError\n            return age\n        except ValueError:\n            print("Invalid.")'},{tip:"Validate inputs as early as possible — before passing them deeper.",code:'def safe_divide(a, b):\n    if b == 0:\n        raise ValueError("b cannot be zero")\n    return a / b'},{tip:"Use .strip() on string inputs to remove accidental spaces.",code:'name = input("Name: ").strip()\nif not name:\n    print("Empty!")\nelse:\n    print(f"Hello, {name}!")'},{tip:"Checking that input is correct before using it is called VALIDATE-ion.",code:'def VALIDATE(val):\n    if not val:\n        raise ValueError("Empty!")\n    return val\nprint(VALIDATE("ok"))'}],19:[{tip:"Good code reads like plain English. Clear names beat clever shortcuts.",code:'# Before\ndef calc(x,y,z): return x*y/z\n# After\ndef unit_price(total, qty, discount):\n    return total*(1-discount)/qty'},{tip:"If a function is longer than ~15 lines, split it into two.",code:'def process():\n    data = load()\n    result = calculate(data)\n    save(result)'},{tip:"Remove debug prints and dead code before calling a project done.",code:'# Remove before shipping:\n# print("DEBUG:", x)\n# old_function()'},{tip:"Cleaning up messy code without changing what it does is called a REFACTOR.",code:'def REFACTOR(items):\n    return [x.strip() for x in items if x.strip()]\nprint(REFACTOR(["  a ", "b", "  "]))'}],20:[{tip:"You built something real! Write down what was hard and what to learn next.",code:'reflection = {\n    "hard": "JSON",\n    "next": ["classes","Flask"]\n}'},{tip:"Share your project on GitHub — even beginners benefit from a portfolio.",code:'# git init\n# git add .\n# git commit -m "first project"\n# git push'},{tip:"What would v2.0 look like? Adding a feature is the best way to keep learning.",code:'v2 = [\n    "web interface with Flask",\n    "SQLite instead of JSON",\n    "user login"\n]'},{tip:"Someone who truly knows Python end-to-end earns the title PYTHONISTA.",code:'title = "PYTHONISTA"\nprint(f"You are a {title}!")'}]};
+
+const CHALLENGES_DATA = CHALLENGES;
+const hintUnlocked = {};
+const hintIndex = {};
+var currentUnlockDay = null;
+const TOTAL=20, PER=5;
+let cur=1;
+const weekDone=[false,false,false,false];
+const EASE='cubic-bezier(0.76,0,0.24,1)', DUR='600ms';
+
+function goTo(n){
+  if(n===cur) return;
+  if(n>cur && !weekDone[n-2]) return;
+  var from=document.querySelector('.slide[data-week="'+cur+'"]');
+  var to=document.querySelector('.slide[data-week="'+n+'"]');
+  var dir=n>cur?1:-1;
+  to.style.transition='none'; to.style.transform='translateX('+(dir*100)+'%)'; to.style.visibility='visible'; to.classList.add('is-active');
+  to.getBoundingClientRect();
+  var t=DUR+' '+EASE;
+  from.style.transition=t; from.style.transform='translateX('+(-dir*100)+'%)';
+  to.style.transition=t; to.style.transform='translateX(0)';
+  setTimeout(function(){ from.classList.remove('is-active','is-exiting'); from.style.visibility='hidden'; from.style.transition='none'; },620);
+  cur=n; updateTags();
+  // close any open hints on the slide we're leaving
+  document.querySelectorAll('.hint-box.open').forEach(function(box){
+    box.classList.remove('open');
+  });
+  document.querySelectorAll('.hint-btn.open').forEach(function(btn){
+    btn.classList.remove('open');
+  });
+  // clear all hide timers
+  Object.keys(hideTimers).forEach(function(k){ clearTimeout(hideTimers[k]); });
+  setTimeout(function(){ staggerIn(n); },320);
+}
+
+function updateTags(){
+  document.querySelectorAll('.wtag').forEach(function(t){ t.classList.toggle('active',+t.dataset.w===cur); });
+}
+
+function staggerIn(w){
+  var items=[].slice.call(document.querySelectorAll('#d'+w+' .day-wrap'));
+  items.push(document.getElementById('ms'+w));
+  items.forEach(function(el){ el.style.transition='none'; el.classList.add('hidden'); });
+  requestAnimationFrame(function(){
+    items.forEach(function(el,i){ setTimeout(function(){ el.style.transition=''; el.classList.remove('hidden'); },55+i*90); });
+  });
+}
+
+function tick(el,w){
+  el.classList.toggle('done');
+  el.closest('.day').classList.toggle('done-row');
+  updateWeek(w); updateGlobal();
+}
+
+function updateWeek(w){
+  var checks=[].slice.call(document.querySelectorAll('#d'+w+' .check'));
+  var done=checks.filter(function(c){ return c.classList.contains('done'); }).length;
+  var pct=Math.round(done/PER*100);
+  document.getElementById('f'+w).style.width=pct+'%';
+  document.getElementById('l'+w).textContent=done+' / '+PER+' done';
+  document.getElementById('p'+w).textContent=pct+'%';
+  var tag=document.querySelector('.wtag[data-w="'+w+'"]');
+  var banner=document.getElementById('cb'+w);
+  if(done===PER && !weekDone[w-1]){
+    weekDone[w-1]=true; tag.classList.add('done-tag');
+    if(w<4){ var next=document.querySelector('.wtag[data-w="'+(w+1)+'"]'); if(next) next.classList.remove('locked'); }
+    setTimeout(function(){ banner.classList.add('show'); },350);
+    if(w<4) setTimeout(function(){ goTo(w+1); },2000);
+  } else if(done<PER){
+    weekDone[w-1]=false; tag.classList.remove('done-tag'); banner.classList.remove('show');
+    if(w<4 && !weekDone[w]){ var next=document.querySelector('.wtag[data-w="'+(w+1)+'"]'); if(next) next.classList.add('locked'); }
+  }
+}
+
+function updateGlobal(){
+  var done=document.querySelectorAll('.check.done').length;
+  var pct=Math.round(done/TOTAL*100);
+  document.getElementById('gpfill').style.width=pct+'%';
+  document.getElementById('gpct').textContent=pct;
+}
+
+function tryOpenSecret(){
+  if(!weekDone.every(Boolean)){
+    var btn=document.getElementById('secret-btn');
+    btn.style.transition='transform 0.08s ease'; var c=0;
+    var iv=setInterval(function(){ btn.style.transform=c%2===0?'translateX(-6px)':'translateX(6px)'; c++; if(c>7){ clearInterval(iv); btn.style.transform=''; } },80);
+    return;
+  }
+  openSecret();
+}
+
+function openSecret(){
+  var o=document.getElementById('secret-overlay');
+  var card=o.querySelector('.secret-card'); var clone=card.cloneNode(true);
+  clone.querySelector('.s-close').onclick=closeSecret;
+  card.parentNode.replaceChild(clone,card);
+  o.classList.add('visible'); startParticles();
+}
+
+function closeSecret(){
+  var o=document.getElementById('secret-overlay');
+  o.style.transition='opacity 0.5s ease'; o.style.opacity='0';
+  setTimeout(function(){ o.classList.remove('visible'); o.style.opacity=''; o.style.transition=''; },520);
+}
+
+function startParticles(){
+  var canvas=document.getElementById('secret-canvas'); var ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  var cols=['#00e5ff','#bf5fff','#ff3cac','#ff9d3d','#ffffff'];
+  var pts=[];
+  for(var i=0;i<220;i++) pts.push({x:Math.random()*canvas.width,y:canvas.height+Math.random()*250,vx:(Math.random()-0.5)*3.5,vy:-(Math.random()*6+2.5),r:Math.random()*5+1.5,color:cols[Math.floor(Math.random()*cols.length)],a:1,dec:Math.random()*0.01+0.005,sq:Math.random()>0.5,rot:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.14});
+  (function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); var alive=false;
+    pts.forEach(function(p){ if(p.a<=0) return; alive=true; p.x+=p.vx; p.y+=p.vy; p.vy+=0.065; p.a-=p.dec; p.rot+=p.rs; ctx.save(); ctx.globalAlpha=Math.max(0,p.a); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.color; if(p.sq){ ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2); } else { ctx.beginPath(); ctx.arc(0,0,p.r,0,Math.PI*2); ctx.fill(); } ctx.restore(); });
+    if(alive) requestAnimationFrame(draw);
+  })();
+}
+
+/* HINTS */
+var hideTimers={};
+function showHint(i){
+  if(!hintUnlocked[i]){ openUnlockModal(i); return; }
+  clearTimeout(hideTimers[i]);
+  if(hintIndex[i]===undefined) hintIndex[i]=0;
+  var list=HINTS[i]; if(!list) return;
+  var h=list[hintIndex[i]];
+  document.getElementById('htip'+i).innerHTML=h.tip;
+  document.getElementById('hcode'+i).textContent=h.code;
+  document.getElementById('hbox'+i).classList.add('open');
+  document.getElementById('hb'+i).classList.add('open');
+}
+function keepHint(i){ clearTimeout(hideTimers[i]); }
+function schedHide(i){ hideTimers[i]=setTimeout(function(){ hideHint(i); },200); }
+function hideHint(i){
+  if(HINTS[i]) hintIndex[i]=((hintIndex[i]||0)+1)%HINTS[i].length;
+  document.getElementById('hbox'+i).classList.remove('open');
+  document.getElementById('hb'+i).classList.remove('open');
+}
+
+/* UNLOCK MODAL */
+function openUnlockModal(day){
+  currentUnlockDay=day;
+  var ch=CHALLENGES_DATA[day];
+  document.getElementById('umodal-day').textContent='Day '+day;
+  document.getElementById('umodal-code').textContent=ch.code;
+  document.getElementById('umodal-input').value='';
+  document.getElementById('umodal-msg').textContent='';
+  document.getElementById('umodal-msg').className='umodal-msg';
+  document.getElementById('unlock-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('umodal-input').focus(); },100);
+}
+function closeUnlockModal(){
+  document.getElementById('unlock-modal').classList.remove('open');
+  currentUnlockDay=null;
+}
+function submitUnlock(){
+  var val=document.getElementById('umodal-input').value.trim();
+  var msg=document.getElementById('umodal-msg');
+  var ch=CHALLENGES_DATA[currentUnlockDay];
+  if(val===ch.answer){
+    hintUnlocked[currentUnlockDay]=true;
+    var btn=document.getElementById('hb'+currentUnlockDay);
+    if(btn) btn.classList.add('unlocked');
+    msg.textContent='✓ Unlocked!'; msg.className='umodal-msg ok';
+    setTimeout(function(){ closeUnlockModal(); showHint(currentUnlockDay); },700);
+  } else {
+    msg.textContent='✗ Wrong — try again!'; msg.className='umodal-msg err';
+    var input=document.getElementById('umodal-input');
+    input.style.borderColor='rgba(255,60,60,0.6)'; input.style.boxShadow='0 0 10px rgba(255,60,60,0.2)';
+    setTimeout(function(){ input.style.borderColor=''; input.style.boxShadow=''; },600);
+  }
+}
+document.addEventListener('keydown',function(e){
+  if(document.getElementById('unlock-modal').classList.contains('open')){
+    if(e.key==='Enter') submitUnlock();
+    if(e.key==='Escape') closeUnlockModal();
+  }
+  if(e.key==='Escape') closeSecret();
+});
+
+window.addEventListener('load',function(){
+  var items=[].slice.call(document.querySelectorAll('#d1 .day-wrap'));
+  items.push(document.getElementById('ms1'));
+  items.forEach(function(el){ el.style.transition='none'; el.classList.add('hidden'); });
+  requestAnimationFrame(function(){
+    items.forEach(function(el,i){ setTimeout(function(){ el.style.transition=''; el.classList.remove('hidden'); },180+i*90); });
+  });
+});
+
+  /* SPLASH */
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      document.getElementById('splash-fill').style.width = '100%';
+    }, 100);
+    setTimeout(function() {
+      document.getElementById('splash').classList.add('hidden');
+    }, 2200);
+  });
+
+
+  /* SERVICE WORKER */
+  if ('serviceWorker' in navigator) {
+    var swCode = `
+self.addEventListener('install', function(e) {
+  e.waitUntil(
+    caches.open('python-plan-v1').then(function(cache) {
+      return cache.addAll(['/']);
+    })
+  );
+});
+self.addEventListener('fetch', function(e) {
+  e.respondWith(
+    caches.match(e.request).then(function(r) {
+      return r || fetch(e.request);
+    })
+  );
+});
+`;
+    var blob = new Blob([swCode], {type: 'application/javascript'});
+    var swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(function(){});
+  }
+
+
+  /* ── PWA ── */
+  // hide splash after load
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      var splash = document.getElementById('splash');
+      if (splash) splash.classList.add('hidden');
+    }, 2000);
+  });
+
+  // register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+
+</script>
+</body>
+</html>
